@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoManager", "TodoManager\TodoManager.csproj", "{BE19E185-C660-450A-AE3E-FFC8E5CF328E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewsManager", "TodoManager\NewsManager.csproj", "{BE19E185-C660-450A-AE3E-FFC8E5CF328E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{A73D8C58-C380-4706-B362-C8B9F81C1BD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{BE19E185-C660-450A-AE3E-FFC8E5CF328E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE19E185-C660-450A-AE3E-FFC8E5CF328E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE19E185-C660-450A-AE3E-FFC8E5CF328E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A73D8C58-C380-4706-B362-C8B9F81C1BD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A73D8C58-C380-4706-B362-C8B9F81C1BD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A73D8C58-C380-4706-B362-C8B9F81C1BD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A73D8C58-C380-4706-B362-C8B9F81C1BD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
