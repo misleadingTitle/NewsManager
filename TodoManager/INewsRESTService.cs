@@ -25,27 +25,29 @@ namespace NewsManager
             ResponseFormat = WebMessageFormat.Xml,
             BodyStyle = WebMessageBodyStyle.Bare,
             UriTemplate = "GetArticleList/{Id}")]
-        Article GetArticleById(int Id);
+        Article GetArticleById(string Id);
 
         [OperationContract]
-        [WebInvoke(Method = "PUT",
-            ResponseFormat = WebMessageFormat.Xml,
+        [WebInvoke(Method = "POST",
+            ResponseFormat = WebMessageFormat.Json,
+            RequestFormat= WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare,
             UriTemplate = "InsertArticle/{Id}")]
-        string InsertArticle(Article article);
+        string InsertArticle(Article article,string Id);
 
         [OperationContract]
         [WebInvoke(Method = "PUT",
-            ResponseFormat = WebMessageFormat.Xml,
+           ResponseFormat = WebMessageFormat.Json,
+            RequestFormat = WebMessageFormat.Json,
             BodyStyle = WebMessageBodyStyle.Bare,
             UriTemplate = "UpdateArticle/{Id}")]
-        string UpdateArticle(Article article, int Id);
+        string UpdateArticle(Article article, string Id);
 
         [OperationContract]
         [WebInvoke(Method = "DELETE",
             ResponseFormat = WebMessageFormat.Xml,
             BodyStyle = WebMessageBodyStyle.Bare,
             UriTemplate = "DeleteArticle/{Id}")]
-        string  DeleteArticle(int Id);
+        string DeleteArticle(string Id);
     }
 }
