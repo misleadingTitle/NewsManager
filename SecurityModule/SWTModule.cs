@@ -11,7 +11,7 @@ namespace SecurityModule
         string serviceNamespace = "restfulproject";
         string acsHostName = "accesscontrol.windows.net";
         string trustedTokenPolicyKey = "h8hyCWwzKHgJpbQff2sKJ2thQu1MdsgMUTSnMGwWCao=";
-        string trustedAudience = @"http://localhost:50052/RESTfulWCFUsersServiceEndPoint.svc";
+        string trustedAudience = @"http://k31:57614/NewsRESTService.svc";
 
         void IHttpModule.Dispose() { }
 
@@ -24,51 +24,54 @@ namespace SecurityModule
         {
             //HNDLE SWT TOKEN VALIDATION
             //GET the authorization header
-            try
+            if (true)
             {
-                string headerValue = HttpContext.Current.Request.Headers.Get("Authorization");
-
-                //check the value is present
-                if (string.IsNullOrEmpty(headerValue))
+                try
                 {
-                    throw new ApplicationException("SWTModule: unauthorized");
-                }
+                    string headerValue = HttpContext.Current.Request.Headers.Get("Authorization");
 
-                //must start with 'wrap'
-                if (!headerValue.StartsWith("WRAP "))
+                    //check the value is present
+                    if (string.IsNullOrEmpty(headerValue))
+                    {
+                        throw new ApplicationException("SWTModule: unauthorized");
+                    }
+
+                    //must start with 'wrap'
+                    if (!headerValue.StartsWith("WRAP "))
+                    {
+                        throw new ApplicationException("SWTModule: unauthorized");
+                    }
+
+                    string[] nameValuePair = headerValue.Substring("WRAP ".Length).Split(new char[] { '=' }, 2);
+                    if (nameValuePair.Length != 2 ||
+                        nameValuePair[0] != "access_token" ||
+                        !nameValuePair[1].StartsWith("\"") ||
+                        !nameValuePair[1].EndsWith("\""))
+                    {
+                        throw new ApplicationException("SWTModule: unauthorized");
+                    }
+
+                    //trim the double quotes
+                    string token = nameValuePair[1].Substring(1, nameValuePair[1].Length - 2);
+
+                    //create a token validator
+                    TokenValidator validator = new TokenValidator(
+                        this.acsHostName,
+                        this.serviceNamespace,
+                        this.trustedAudience,
+                        this.trustedTokenPolicyKey);
+
+                    if (!validator.Validate(token))
+                    {
+                        throw new ApplicationException("SWTModule: unauthorized");
+                    }
+                }
+                catch (ApplicationException ex)
                 {
-                    throw new ApplicationException("SWTModule: unauthorized");
+                    ((HttpApplication)sender).Response.Status = "403 Forbidden";
+                    ((HttpApplication)sender).Response.StatusCode = 403;
+                    ((HttpApplication)sender).Response.StatusDescription = "Forbidden";
                 }
-
-                string[] nameValuePair = headerValue.Substring("WRAP ".Length).Split(new char[] { '=' }, 2);
-                if (nameValuePair.Length != 2 ||
-                    nameValuePair[0] != "access_token" ||
-                    !nameValuePair[1].StartsWith("\"") ||
-                    !nameValuePair[1].EndsWith("\""))
-                {
-                    throw new ApplicationException("SWTModule: unauthorized");
-                }
-
-                //trim the double quotes
-                string token = nameValuePair[1].Substring(1, nameValuePair[1].Length - 2);
-
-                //create a token validator
-                TokenValidator validator = new TokenValidator(
-                    this.acsHostName,
-                    this.serviceNamespace,
-                    this.trustedAudience,
-                    this.trustedTokenPolicyKey);
-
-                if (!validator.Validate(token))
-                {
-                    throw new ApplicationException("SWTModule: unauthorized");
-                }
-            }
-            catch (ApplicationException ex)
-            {
-                ((HttpApplication)sender).Response.Status = "403 Forbidden";
-                ((HttpApplication)sender).Response.StatusCode = 403;
-                ((HttpApplication)sender).Response.StatusDescription = "Forbidden";
             }
         }
 
