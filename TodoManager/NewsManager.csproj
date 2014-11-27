@@ -93,6 +93,10 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SecurityModule\SecurityModule.csproj">
+      <Project>{e325d1d0-d0a8-429d-a3d7-ba8240fdee0c}</Project>
+      <Name>SecurityModule</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Shared\Shared.csproj">
       <Project>{a73d8c58-c380-4706-b362-c8b9f81c1bd2}</Project>
       <Name>Shared</Name>

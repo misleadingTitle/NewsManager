@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewsManager", "TodoManager\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{A73D8C58-C380-4706-B362-C8B9F81C1BD2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SecurityModule", "SecurityModule\SecurityModule.csproj", "{E325D1D0-D0A8-429D-A3D7-BA8240FDEE0C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{A73D8C58-C380-4706-B362-C8B9F81C1BD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A73D8C58-C380-4706-B362-C8B9F81C1BD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A73D8C58-C380-4706-B362-C8B9F81C1BD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E325D1D0-D0A8-429D-A3D7-BA8240FDEE0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E325D1D0-D0A8-429D-A3D7-BA8240FDEE0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E325D1D0-D0A8-429D-A3D7-BA8240FDEE0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E325D1D0-D0A8-429D-A3D7-BA8240FDEE0C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
