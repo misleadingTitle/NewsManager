@@ -24,7 +24,7 @@ namespace SecurityModule
         {
             //HNDLE SWT TOKEN VALIDATION
             //GET the authorization header
-            if (true)
+            if (System.Configuration.ConfigurationManager.AppSettings["token"].ToString()=="1")
             {
                 try
                 {
@@ -69,8 +69,6 @@ namespace SecurityModule
                 catch (ApplicationException ex)
                 {
                     ((HttpApplication)sender).Response.Status = "403 Forbidden";
-                    ((HttpApplication)sender).Response.StatusCode = 403;
-                    ((HttpApplication)sender).Response.StatusDescription = "Forbidden";
                 }
             }
         }
