@@ -8,11 +8,6 @@ namespace SecurityModule
 {
     class SWTModule : IHttpModule
     {
-        string serviceNamespace = "restfulproject";
-        string acsHostName = "accesscontrol.windows.net";
-        string trustedTokenPolicyKey = "h8hyCWwzKHgJpbQff2sKJ2thQu1MdsgMUTSnMGwWCao=";
-        string trustedAudience = @"http://k31:57614/NewsRESTService.svc";
-
         void IHttpModule.Dispose() { }
 
         void IHttpModule.Init(HttpApplication context)
@@ -56,10 +51,10 @@ namespace SecurityModule
 
                     //create a token validator
                     TokenValidator validator = new TokenValidator(
-                        this.acsHostName,
-                        this.serviceNamespace,
-                        this.trustedAudience,
-                        this.trustedTokenPolicyKey);
+                        AccessData.acsHostName,
+                        AccessData.serviceNamespace,
+                        AccessData.trustedAudience,
+                        AccessData.trustedTokenPolicyKey);
 
                     if (!validator.Validate(token))
                     {
