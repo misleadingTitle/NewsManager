@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Web;
 
@@ -17,6 +18,7 @@ namespace SecurityModule
 
         void context_BeginRequest(object sender, EventArgs e)
         {
+            HttpContext.Current.User = new GenericPrincipal(new GenericIdentity("prova"),new string[]{"user"});
             //HNDLE SWT TOKEN VALIDATION
             //GET the authorization header
             if (System.Configuration.ConfigurationManager.AppSettings["token"].ToString()=="1")

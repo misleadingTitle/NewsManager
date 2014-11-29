@@ -32,6 +32,7 @@ namespace SecurityModule
 
         internal bool Validate(string token)
         {
+            var isinrole = HttpContext.Current.User.IsInRole("usr");
             if (!this.IsHMACValid(token, Convert.FromBase64String(this.trustedSigningKey)))
             {
                 return false;

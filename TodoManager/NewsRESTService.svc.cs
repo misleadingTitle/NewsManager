@@ -4,7 +4,9 @@ using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 using System.ServiceModel;
+using System.ServiceModel.Web;
 using System.Text;
 using Shared;
 
@@ -14,6 +16,7 @@ namespace NewsManager
     {
         public List<Article> GetArticlesList()
         {
+            var a = WebOperationContext.Current.IncomingRequest;
             List<Article> result= new List<Article>();
             using (SqlConnection connection =
             new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
