@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 using System.Web;
 
@@ -9,6 +11,9 @@ namespace SecurityModule
 {
     class TokenValidator
     {
+
+        //HttpContext.Current.User = new GenericPrincipal(new GenericIdentity("prova"),new string[]{"user"});
+        public IPrincipal user;
         private string issuerLabel = "Issuer";
         private string expiresLabel = "ExpiresOn";
         private string audienceLabel = "Audience";
@@ -53,7 +58,17 @@ namespace SecurityModule
                 return false;
             }
 
+            user = this.GetUserRole(token);
+
             return true;
+        }
+
+        private IPrincipal GetUserRole(string token)
+        {
+            //Parsing Logic
+            string username = String.Empty;
+            string role = String.Empty;
+            return new ClaimsPrincipal(new ClaimsIdentity("acs", username, role));
         }
 
         public Dictionary<string, string> GetNameValues(string token)

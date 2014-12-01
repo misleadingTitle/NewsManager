@@ -3,25 +3,35 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using System.Web;
 using Shared;
 
 namespace NewsManager
 {
+
+    public enum NewsRoles
+    {
+        admin,
+        editor
+    }
     public class NewsRESTService : INewsRESTService
     {
         public List<Article> GetArticlesList()
         {
-            var a = WebOperationContext.Current.IncomingRequest;
-            List<Article> result= new List<Article>();
+            List<Article> result = new List<Article>();
+            //var a = WebOperationContext.Current.IncomingRequest;
             using (SqlConnection connection =
             new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
             {
-                SqlCommand command = new SqlCommand("select * from ArticleSet", connection);
+                string commandString = "select * from ArticleSet";
+                commandString += HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString()) ? "" : " where IsDeleted='0'";
+                SqlCommand command = new SqlCommand(commandString, connection);
                 try
                 {
                     connection.Open();
@@ -46,8 +56,9 @@ namespace NewsManager
                     Console.WriteLine(ex.Message);
                 }
 
+
+                return result;
             }
-            return result;
         }
 
 
@@ -57,14 +68,16 @@ namespace NewsManager
             using (SqlConnection connection =
             new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
             {
-                SqlCommand command = new SqlCommand("select * from ArticleSet where Id='"+Id+"'", connection);
+                string commandString = "select * from ArticleSet where Id='" + Id + "'";
+                commandString += HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString()) ? "" : " and IsDeleted='0'";
+                SqlCommand command = new SqlCommand(commandString, connection);
                 try
                 {
                     connection.Open();
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
-                        result= new Article()
+                        result = new Article()
                         {
                             Id = reader[0].ToString(),
                             Title = reader[1].ToString(),
@@ -88,11 +101,14 @@ namespace NewsManager
 
         public string InsertArticle(Article article, string Id)
         {
-            using (SqlConnection connection =
-            new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
+            if (HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString())
+                || HttpContext.Current.User.IsInRole(NewsRoles.editor.ToString()))
             {
-                SqlCommand command = new SqlCommand(
-                    string.Format(@"INSERT INTO [dbo].[ArticleSet]
+                using (SqlConnection connection =
+                new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
+                {
+                    SqlCommand command = new SqlCommand(
+                        string.Format(@"INSERT INTO [dbo].[ArticleSet]
            ([Id]
            ,[Title]
            ,[Category]
@@ -101,21 +117,30 @@ namespace NewsManager
            ,[IsPublished]
            ,[IsDeleted])
      VALUES
-           ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')",article.Id,article.Title,article.Category,article.Abstract,article.Body,article.IsPublished.ToString(),false.ToString())
-                                         , connection);
+           ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", article.Id, article.Title, article.Category, article.Abstract, article.Body, article.IsPublished.ToString(), false.ToString())
+                                             , connection);
                     connection.Open();
                     SqlDataReader reader = command.ExecuteReader();
                     return article.Id;
+                }
+            }
+            else
+            {
+                HttpContext.Current.Response.Status = "403 Forbidden";
+                return null;
             }
         }
 
         public string UpdateArticle(Article article, string Id)
         {
-            using (SqlConnection connection =
-new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
+            if (HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString())
+               || HttpContext.Current.User.IsInRole(NewsRoles.editor.ToString()))
             {
-                SqlCommand command = new SqlCommand(
-                    string.Format(@"UPDATE [dbo].[ArticleSet]
+                using (SqlConnection connection =
+    new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
+                {
+                    SqlCommand command = new SqlCommand(
+                        string.Format(@"UPDATE [dbo].[ArticleSet]
    SET [Title] = '{1}'
       ,[Category] = '{2}'
       ,[Abstract] = '{3}'
@@ -123,24 +148,39 @@ new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].Con
       ,[IsPublished] = '{5}'
       ,[IsDeleted] = '{6}'
  WHERE Id='{0}'", article.Id, article.Title, article.Category, article.Abstract, article.Body, article.IsPublished.ToString(), false.ToString())
-                                         , connection);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                return article.Id;
+                                             , connection);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    return article.Id;
+                }
+            }
+            else
+            {
+                HttpContext.Current.Response.Status = "403 Forbidden";
+                return null;
             }
         }
 
         public string DeleteArticle(string Id)
         {
-             using (SqlConnection connection =
-new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
+            if (HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString()))
             {
-                SqlCommand command = new SqlCommand(
-                    string.Format(@"DELETE FROM [dbo].[ArticleSet] WHERE Id='{0}'", Id)
-                                         , connection);
-                connection.Open();
-                SqlDataReader reader = command.ExecuteReader();
-                return Id;
+                using (SqlConnection connection =
+    new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
+                {
+                    SqlCommand command = new SqlCommand(
+                        string.Format(@"UPDATE [dbo].[ArticleSet]
+   SET [IsDeleted] = 1 WHERE Id='{0}'", Id)
+                                             , connection);
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    return Id;
+                }
+            }
+            else
+            {
+                HttpContext.Current.Response.Status = "403 Forbidden";
+                return null;
             }
         }
     }

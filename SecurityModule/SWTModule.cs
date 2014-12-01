@@ -18,10 +18,10 @@ namespace SecurityModule
 
         void context_BeginRequest(object sender, EventArgs e)
         {
-            HttpContext.Current.User = new GenericPrincipal(new GenericIdentity("prova"),new string[]{"user"});
+            //HttpContext.Current.User = new GenericPrincipal(new GenericIdentity("prova"), new string[] { "user" });
             //HNDLE SWT TOKEN VALIDATION
             //GET the authorization header
-            if (System.Configuration.ConfigurationManager.AppSettings["token"].ToString()=="1")
+            if (System.Configuration.ConfigurationManager.AppSettings["token"].ToString() == "1")
             {
                 try
                 {
@@ -62,6 +62,7 @@ namespace SecurityModule
                     {
                         throw new ApplicationException("SWTModule: unauthorized");
                     }
+                    HttpContext.Current.User = validator.user;
                 }
                 catch (ApplicationException ex)
                 {
