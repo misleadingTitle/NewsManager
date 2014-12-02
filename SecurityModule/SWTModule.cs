@@ -7,7 +7,7 @@ using System.Web;
 
 namespace SecurityModule
 {
-    class SWTModule : IHttpModule
+    public class SWTModule : IHttpModule
     {
         void IHttpModule.Dispose() { }
 
@@ -26,48 +26,56 @@ namespace SecurityModule
                 try
                 {
                     string headerValue = HttpContext.Current.Request.Headers.Get("Authorization");
-
-                    //check the value is present
-                    if (string.IsNullOrEmpty(headerValue))
-                    {
-                        throw new ApplicationException("SWTModule: unauthorized");
-                    }
-
-                    //must start with 'wrap'
-                    if (!headerValue.StartsWith("WRAP "))
-                    {
-                        throw new ApplicationException("SWTModule: unauthorized");
-                    }
-
-                    string[] nameValuePair = headerValue.Substring("WRAP ".Length).Split(new char[] { '=' }, 2);
-                    if (nameValuePair.Length != 2 ||
-                        nameValuePair[0] != "access_token" ||
-                        !nameValuePair[1].StartsWith("\"") ||
-                        !nameValuePair[1].EndsWith("\""))
-                    {
-                        throw new ApplicationException("SWTModule: unauthorized");
-                    }
-
-                    //trim the double quotes
-                    string token = nameValuePair[1].Substring(1, nameValuePair[1].Length - 2);
-
-                    //create a token validator
-                    TokenValidator validator = new TokenValidator(
-                        AccessData.acsHostName,
-                        AccessData.serviceNamespace,
-                        AccessData.trustedAudience,
-                        AccessData.trustedTokenPolicyKey);
-
-                    if (!validator.Validate(token))
-                    {
-                        throw new ApplicationException("SWTModule: unauthorized");
-                    }
-                    HttpContext.Current.User = validator.user;
+                    TokenValidator validator = GetValidator();
+                    ValidateHeader(headerValue,validator);
                 }
                 catch (ApplicationException ex)
                 {
                     ((HttpApplication)sender).Response.Status = "403 Forbidden";
                 }
+            }
+        }
+
+        public static TokenValidator GetValidator()
+        {
+            //create a token validator
+            TokenValidator validator = new TokenValidator(
+                AccessData.acsHostName,
+                AccessData.serviceNamespace,
+                AccessData.trustedAudience,
+                AccessData.trustedTokenPolicyKey);
+            return validator;
+        }
+
+        public static void ValidateHeader(string headerValue, TokenValidator validator)
+        {
+            //check the value is present
+            if (string.IsNullOrEmpty(headerValue))
+            {
+                throw new ApplicationException("SWTModule: unauthorized");
+            }
+
+            //must start with 'wrap'
+            if (!headerValue.StartsWith("WRAP "))
+            {
+                throw new ApplicationException("SWTModule: unauthorized");
+            }
+
+            string[] nameValuePair = headerValue.Substring("WRAP ".Length).Split(new char[] { '=' }, 2);
+            if (nameValuePair.Length != 2 ||
+                nameValuePair[0] != "access_token" ||
+                !nameValuePair[1].StartsWith("\"") ||
+                !nameValuePair[1].EndsWith("\""))
+            {
+                throw new ApplicationException("SWTModule: unauthorized");
+            }
+
+            //trim the double quotes
+            string token = nameValuePair[1].Substring(1, nameValuePair[1].Length - 2);
+
+            if (!validator.Validate(token))
+            {
+                throw new ApplicationException("SWTModule: unauthorized");
             }
         }
 

@@ -10,6 +10,7 @@ using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
 using System.Web;
+using SecurityModule;
 using Shared;
 
 namespace NewsManager
@@ -24,13 +25,18 @@ namespace NewsManager
     {
         public List<Article> GetArticlesList()
         {
+
+            TokenValidator validator = SWTModule.GetValidator();
+            SWTModule.ValidateHeader(WebOperationContext.Current.IncomingRequest.Headers.Get("Authorization"), validator);
             List<Article> result = new List<Article>();
-            //var a = WebOperationContext.Current.IncomingRequest;
             using (SqlConnection connection =
             new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
             {
                 string commandString = "select * from ArticleSet";
-                commandString += HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString()) ? "" : " where IsDeleted='0'";
+                if (validator.user != null)
+                {
+                    commandString += validator.user.IsInRole(NewsRoles.admin.ToString()) ? "" : " where IsDeleted='0'";
+                }
                 SqlCommand command = new SqlCommand(commandString, connection);
                 try
                 {

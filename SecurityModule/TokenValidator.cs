@@ -9,10 +9,10 @@ using System.Web;
 
 namespace SecurityModule
 {
-    class TokenValidator
+    public class TokenValidator
     {
 
-        //HttpContext.Current.User = new GenericPrincipal(new GenericIdentity("prova"),new string[]{"user"});
+        
         public IPrincipal user;
         private string issuerLabel = "Issuer";
         private string expiresLabel = "ExpiresOn";
@@ -35,9 +35,8 @@ namespace SecurityModule
             this.trustedAudienceValue = trustedAudienceValue;
         }
 
-        internal bool Validate(string token)
+        public bool Validate(string token)
         {
-            var isinrole = HttpContext.Current.User.IsInRole("usr");
             if (!this.IsHMACValid(token, Convert.FromBase64String(this.trustedSigningKey)))
             {
                 return false;
@@ -63,12 +62,12 @@ namespace SecurityModule
             return true;
         }
 
-        private IPrincipal GetUserRole(string token)
+        public IPrincipal GetUserRole(string token)
         {
             //Parsing Logic
-            string username = String.Empty;
-            string role = String.Empty;
-            return new ClaimsPrincipal(new ClaimsIdentity("acs", username, role));
+            Dictionary<string, string> nameValues = this.GetNameValues(token);
+            string role = nameValues[@"http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+            return new GenericPrincipal(new GenericIdentity(""), new string[] { role });
         }
 
         public Dictionary<string, string> GetNameValues(string token)
