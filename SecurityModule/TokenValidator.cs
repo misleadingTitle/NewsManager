@@ -37,28 +37,12 @@ namespace SecurityModule
 
         public bool Validate(string token)
         {
-            if (!this.IsHMACValid(token, Convert.FromBase64String(this.trustedSigningKey)))
-            {
-                return false;
-            }
-
-            if (this.IsExpired(token))
-            {
-                return false;
-            }
-
-            if (!this.IsIssuerTrusted(token))
-            {
-                return false;
-            }
-
-            if (!this.IsAudienceTrusted(token))
-            {
-                return false;
-            }
+            if (!this.IsHMACValid(token, Convert.FromBase64String(this.trustedSigningKey))) return false;
+            if (this.IsExpired(token)) return false;
+            if (!this.IsIssuerTrusted(token)) return false;
+            if (!this.IsAudienceTrusted(token)) return false;
 
             user = this.GetUserRole(token);
-
             return true;
         }
 
@@ -154,18 +138,10 @@ namespace SecurityModule
         private bool IsHMACValid(string swt, byte[] sha256HMACKey)
         {
             string[] swtWithSignature = swt.Split(new string[] { "&" + this.hmacSHA256Label + "=" }, StringSplitOptions.None);
-
-            if ((swtWithSignature == null) || (swtWithSignature.Length != 2))
-            {
-                return false;
-            }
-
+            if ((swtWithSignature == null) || (swtWithSignature.Length != 2)) return false;
             HMACSHA256 hmac = new HMACSHA256(sha256HMACKey);
-
             byte[] locallyGeneratedSignatureInBytes = hmac.ComputeHash(Encoding.ASCII.GetBytes(swtWithSignature[0]));
-
             string locallyGeneratedSignature = HttpUtility.UrlEncode(Convert.ToBase64String(locallyGeneratedSignatureInBytes));
-
             return locallyGeneratedSignature == swtWithSignature[1];
         }
 

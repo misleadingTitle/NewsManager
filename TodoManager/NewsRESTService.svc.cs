@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Net;
 using System.Runtime.Remoting.Contexts;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -28,6 +29,7 @@ namespace NewsManager
 
             TokenValidator validator = SWTModule.GetValidator();
             SWTModule.ValidateHeader(WebOperationContext.Current.IncomingRequest.Headers.Get("Authorization"), validator);
+
             List<Article> result = new List<Article>();
             using (SqlConnection connection =
             new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
@@ -36,6 +38,10 @@ namespace NewsManager
                 if (validator.user != null)
                 {
                     commandString += validator.user.IsInRole(NewsRoles.admin.ToString()) ? "" : " where IsDeleted='0'";
+                }
+                else
+                {
+                    commandString += " where IsDeleted='0'";
                 }
                 SqlCommand command = new SqlCommand(commandString, connection);
                 try
@@ -70,12 +76,18 @@ namespace NewsManager
 
         public Article GetArticleById(string Id)
         {
+
+            TokenValidator validator = SWTModule.GetValidator();
+            SWTModule.ValidateHeader(WebOperationContext.Current.IncomingRequest.Headers.Get("Authorization"), validator);
             Article result = new Article();
             using (SqlConnection connection =
             new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
             {
                 string commandString = "select * from ArticleSet where Id='" + Id + "'";
-                commandString += HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString()) ? "" : " and IsDeleted='0'";
+                if (validator.user != null)
+                {
+                    commandString += validator.user.IsInRole(NewsRoles.admin.ToString()) ? "" : " and IsDeleted='0'";
+                }
                 SqlCommand command = new SqlCommand(commandString, connection);
                 try
                 {
@@ -107,8 +119,10 @@ namespace NewsManager
 
         public string InsertArticle(Article article, string Id)
         {
-            if (HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString())
-                || HttpContext.Current.User.IsInRole(NewsRoles.editor.ToString()))
+            TokenValidator validator = SWTModule.GetValidator();
+            SWTModule.ValidateHeader(WebOperationContext.Current.IncomingRequest.Headers.Get("Authorization"), validator);
+            if (validator.user != null && (validator.user.IsInRole(NewsRoles.admin.ToString())
+                || validator.user.IsInRole(NewsRoles.editor.ToString())))
             {
                 using (SqlConnection connection =
                 new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
@@ -132,15 +146,17 @@ namespace NewsManager
             }
             else
             {
-                HttpContext.Current.Response.Status = "403 Forbidden";
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.Forbidden;// "403 Forbidden";
                 return null;
             }
         }
 
         public string UpdateArticle(Article article, string Id)
         {
-            if (HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString())
-               || HttpContext.Current.User.IsInRole(NewsRoles.editor.ToString()))
+            TokenValidator validator = SWTModule.GetValidator();
+            SWTModule.ValidateHeader(WebOperationContext.Current.IncomingRequest.Headers.Get("Authorization"), validator);
+            if (validator.user != null && (validator.user.IsInRole(NewsRoles.admin.ToString())
+               || validator.user.IsInRole(NewsRoles.editor.ToString())))
             {
                 using (SqlConnection connection =
     new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
@@ -162,14 +178,16 @@ namespace NewsManager
             }
             else
             {
-                HttpContext.Current.Response.Status = "403 Forbidden";
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.Forbidden;// "403 Forbidden";
                 return null;
             }
         }
 
         public string DeleteArticle(string Id)
         {
-            if (HttpContext.Current.User.IsInRole(NewsRoles.admin.ToString()))
+            TokenValidator validator = SWTModule.GetValidator();
+            SWTModule.ValidateHeader(WebOperationContext.Current.IncomingRequest.Headers.Get("Authorization"), validator);
+            if (validator.user != null && validator.user.IsInRole(NewsRoles.admin.ToString()))
             {
                 using (SqlConnection connection =
     new SqlConnection(ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString))
@@ -185,7 +203,7 @@ namespace NewsManager
             }
             else
             {
-                HttpContext.Current.Response.Status = "403 Forbidden";
+                WebOperationContext.Current.OutgoingResponse.StatusCode = HttpStatusCode.Forbidden;// "403 Forbidden";
                 return null;
             }
         }

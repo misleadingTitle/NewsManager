@@ -23,16 +23,9 @@ namespace SecurityModule
             //GET the authorization header
             if (System.Configuration.ConfigurationManager.AppSettings["token"].ToString() == "1")
             {
-                try
-                {
-                    string headerValue = HttpContext.Current.Request.Headers.Get("Authorization");
-                    TokenValidator validator = GetValidator();
-                    ValidateHeader(headerValue,validator);
-                }
-                catch (ApplicationException ex)
-                {
-                    ((HttpApplication)sender).Response.Status = "403 Forbidden";
-                }
+                string headerValue = HttpContext.Current.Request.Headers.Get("Authorization");
+                TokenValidator validator = GetValidator();
+                ValidateHeader(headerValue, validator);
             }
         }
 
@@ -47,18 +40,18 @@ namespace SecurityModule
             return validator;
         }
 
-        public static void ValidateHeader(string headerValue, TokenValidator validator)
+        public static bool ValidateHeader(string headerValue, TokenValidator validator)
         {
             //check the value is present
             if (string.IsNullOrEmpty(headerValue))
             {
-                throw new ApplicationException("SWTModule: unauthorized");
+                return false;
             }
 
             //must start with 'wrap'
             if (!headerValue.StartsWith("WRAP "))
             {
-                throw new ApplicationException("SWTModule: unauthorized");
+                return false;
             }
 
             string[] nameValuePair = headerValue.Substring("WRAP ".Length).Split(new char[] { '=' }, 2);
@@ -67,7 +60,7 @@ namespace SecurityModule
                 !nameValuePair[1].StartsWith("\"") ||
                 !nameValuePair[1].EndsWith("\""))
             {
-                throw new ApplicationException("SWTModule: unauthorized");
+                return false;
             }
 
             //trim the double quotes
@@ -75,8 +68,9 @@ namespace SecurityModule
 
             if (!validator.Validate(token))
             {
-                throw new ApplicationException("SWTModule: unauthorized");
+                return false;
             }
+            return true;
         }
 
 
